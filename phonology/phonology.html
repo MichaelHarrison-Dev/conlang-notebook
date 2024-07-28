@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <title>Phonology</title>
+</head>
+
+<body onload="loadDeclarationTexts()">
+    <div id="container">
+        <div class="textarea-container">
+            <label for="sound-declaration-textarea">Sounds</label>
+            <textarea id="sound-declaration-textarea" spellcheck="false"></textarea>
+        </div>
+        <div class="textarea-container">
+            <label for="sound-class-declaration-textarea">Sound Classes</label>
+            <textarea id="sound-class-declaration-textarea" spellcheck="false"></textarea>
+        </div>
+        <div class="textarea-container">
+            <label for="word-structure-declaration-textarea">Word Structures</label>
+            <textarea id="word-structure-declaration-textarea" spellcheck="false"></textarea>
+        </div>
+        <!-- <div class="textarea-container">
+            <label for="word-filter-declaration-textarea">Word Filters</label>
+            <textarea id="word-filter-declaration-textarea" spellcheck="false"></textarea>
+        </div> -->
+    </div>
+    <div id="button-container">
+        <button onclick="saveDeclarationTexts()">Save</button>
+    </div>
+</body>
+
+</html>
