@@ -1,0 +1,45 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    padding: 1rem;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+#container {
+    display: flex;
+    gap: 1rem;
+    justify-content: space-evenly;
+}
+
+.textarea-container {
+    flex-grow: 1;
+}
+
+.textarea-container label {
+    display: block;
+    font-size: 1.25rem;
+}
+
+.textarea-container textarea {
+    min-width: 100%;
+    max-width: 100%;
+    height: 50vh;
+    padding-left: 0.25rem;
+    white-space: nowrap;
+    overflow-wrap: normal;
+    overflow-x: scroll;
+}
+
+#button-container {
+    display: flex;
+    justify-content: end;
+}
+
+button {
+    font-size: 1.25rem;
+    font-family: inherit;
+}
