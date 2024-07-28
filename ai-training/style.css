@@ -1,0 +1,49 @@
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+body {
+    padding: 1rem;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+#container {
+    display: flex;
+    gap: 1rem;
+    justify-content: start;
+}
+
+#sidebar h1 {
+    margin-bottom: 1rem;
+    font-size: 2rem;
+    border-bottom: 2px solid black;
+}
+
+#sidebar h2 {
+    font-size: 1.25rem;
+    font-weight: normal;
+}
+
+#sidebar ul {
+    margin-left: 1rem;
+}
+
+#sidebar li {
+    list-style-type: none;
+}
+
+#content {
+    flex-grow: 1;
+    text-align: center;
+}
+
+#primary-paragraph {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+#secondary-paragraph {
+    font-size: 1.25rem;
+}
