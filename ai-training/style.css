@@ -10,6 +10,7 @@ body {
 }
 
 #container {
+    height: 50vh;
     display: flex;
     gap: 1rem;
     justify-content: start;
@@ -46,4 +47,14 @@ body {
 
 #secondary-paragraph {
     font-size: 1.25rem;
+}
+
+#button-container {
+    display: flex;
+    justify-content: end;
+}
+
+#button-container button {
+    font-size: 1.25rem;
+    font-family: inherit;
 }
