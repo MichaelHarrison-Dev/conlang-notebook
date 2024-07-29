@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
+    <script src="../word-generation/random-word-generator.js"></script>
     <script src="script.js" defer></script>
     <title>AI Training</title>
 </head>
 
-<body>
+<body onload="initialize()">
     <div id="container">
         <div id="sidebar">
             <h1>Settings</h1>
@@ -23,6 +24,9 @@
             <p id="primary-paragraph"></p>
             <p id="secondary-paragraph"></p>
         </div>
+    </div>
+    <div id="button-container">
+        <button onclick="saveWordLists()">Save</button>
     </div>
 </body>
 
