@@ -4,34 +4,56 @@ const soundClassDeclarationTextArea = document.getElementById("sound-class-decla
 const wordStructureDeclarationTextArea = document.getElementById("word-structure-declaration-textarea");
 
 // Local Storage Logic
-function saveDeclarationTexts() {
-    let formattedSoundDeclarationText = formatToStore(soundDeclarationTextArea.value);
-    if (validateSoundDeclarationText(formattedSoundDeclarationText)) {
-        localStorage.setItem("sound-declaration-text", formattedSoundDeclarationText);
+function savePhonology() {
+    let soundDeclarations = formatToStore(soundDeclarationTextArea.value).split('\n');
+    if (!validateSoundDeclarations(soundDeclarations)) {
+        return;
     }
 
-    let formattedSoundClassDeclarationText = formatToStore(soundClassDeclarationTextArea.value);
-    if (validateSoundClassDeclarationText(formattedSoundClassDeclarationText, formattedSoundDeclarationText)) {
-        localStorage.setItem("sound-class-declaration-text", formattedSoundClassDeclarationText);
+    let soundClassDeclarations = formatToStore(soundClassDeclarationTextArea.value).split('\n');
+    if (!validateSoundClassDeclarations(soundClassDeclarations)
+        || !validateSoundReferences(soundClassDeclarations, soundDeclarations)) {
+        return;
     }
 
-    let formattedWordStructureDeclarationText = formatToStore(wordStructureDeclarationTextArea.value);
-    if (validateWordStructureDeclarationText(formattedWordStructureDeclarationText, formattedSoundClassDeclarationText)) {
-        localStorage.setItem("word-structure-declaration-text", formattedWordStructureDeclarationText);
+    let wordStructureDeclarations = formatToStore(wordStructureDeclarationTextArea.value).split('\n');
+    if (!validateWordStructureDeclarations(wordStructureDeclarations)
+        || !validateSoundClassReferences(wordStructureDeclarations, soundClassDeclarations)) {
+        return;
     }
+
+    let sounds = initializeSounds(soundDeclarations);
+    let soundClasses = initializeSoundClasses(soundClassDeclarations, sounds);
+    let wordStructures = initializeWordStructures(wordStructureDeclarations, soundClasses);
+    let phonology = { sounds: sounds, soundClasses: soundClasses, wordStructures: wordStructures };
+    localStorage.setItem("phonology", JSON.stringify(phonology));
 }
 
-function loadDeclarationTexts() {
-    soundDeclarationTextArea.value = formatToDisplay(localStorage.getItem("sound-declaration-text"));
-    soundClassDeclarationTextArea.value = formatToDisplay(localStorage.getItem("sound-class-declaration-text"));
-    wordStructureDeclarationTextArea.value = formatToDisplay(localStorage.getItem("word-structure-declaration-text"));
+function loadPhonology() {
+    let phonology = JSON.parse(localStorage.getItem("phonology"));
+
+    phonology.sounds.forEach(sound => {
+        soundDeclarationTextArea.value += sound.spelling;
+        soundDeclarationTextArea.value += " : ";
+        sound.attributes.forEach((attribute, index) => soundDeclarationTextArea.value += (index == sound.attributes.length - 1) ? attribute + "\n" : attribute + ", ");
+    });
+
+    phonology.soundClasses.forEach(soundClass => {
+        soundClassDeclarationTextArea.value += soundClass.className;
+        soundClassDeclarationTextArea.value += " : ";
+        soundClass.sounds.forEach((sound, index) => soundClassDeclarationTextArea.value += (index == soundClass.sounds.length - 1) ? sound.spelling + "\n" : sound.spelling + ", ");
+    });
+
+    phonology.wordStructures.forEach(wordStructure => {
+        wordStructure.soundClasses.forEach((soundClass, index) => wordStructureDeclarationTextArea.value += (index == wordStructure.soundClasses.length - 1) ? soundClass.className + "\n" : soundClass.className);
+    });
 }
 
 // Formatting Logic
 function formatToStore(text) {
     return text
-        .replace(/\s+(?=(\n|$))/, "") // removes empty lines
-        .replace(/[ ]+/g, "") // removes whitespace
+        .replace(/\s+(?=(\n|$))/, "") 
+        .replace(/[ ]+/g, "") 
 }
 
 function formatToDisplay(text) {
@@ -40,167 +62,161 @@ function formatToDisplay(text) {
     }
 
     return text
-        .replace(/:/g, " : ") // adds padding around colon
-        .replace(/,/g, ", "); // adds padding after comma
+        .replace(/:/g, " : ") 
+        .replace(/,/g, ", "); 
 }
 
-// Validation Logic
-function validateSoundDeclarationText(text) {
-    let usedSpellings = [];
-    for (const soundDeclaration of text.split('\n')) {
-        if (!validateSoundDeclaration(soundDeclaration, usedSpellings)) {
-            return false;
-        }
-
-        usedSpellings.push(soundDeclaration.split(':')[0]);
-    }
-
-    return true;
-}
-
-function validateSoundClassDeclarationText(text, soundDeclarationText) {
-    let usedNames = [];
-    for (const soundClassDeclaration of text.split('\n')) {
-        if (!validateSoundClassDeclaration(soundClassDeclaration, soundDeclarationText, usedNames)) {
-            return false;
-        }
-
-        usedNames.push(soundClassDeclaration.split(':')[0]);
-    }
-
-    return true;
-}
-
-function validateWordStructureDeclarationText(text, soundClassDeclarationText) {
-    let usedWordStructureDeclarations = [];
-    for (const wordStructureDeclaration of text.split('\n')) {
-        if (!validateWordStructureDeclaration(wordStructureDeclaration, soundClassDeclarationText, usedWordStructureDeclarations)) {
-            return false;
-        }
-
-        usedWordStructureDeclarations.push(wordStructureDeclaration);
-    }
-
-    return true;
-}
-
-function validateSoundDeclaration(declaration, usedSpellings) {
+// Syntax Validation Logic
+function validateSoundDeclarations(declarations) {
     let caller = "Sound Declaration";
+    for (const declaration of declarations) {
+        if (/^$/.test(declaration)) {
+            displayAlert(caller, "empty declaration", declaration);
+            return false;
+        }
 
-    if (/^\s*$/.test(declaration)) {
-        displayAlert(caller, "empty declaration", declaration);
-        return false;
-    }
+        if (!declaration.includes(":")) {
+            displayAlert(caller, "missing colon delimeter", declaration);
+            return false;
+        }
 
-    if (!declaration.includes(":")) {
-        displayAlert(caller, "missing colon delimeter", declaration);
-        return false;
-    }
+        if (/^:/.test(declaration)) {
+            displayAlert(caller, "missing spelling section", declaration);
+            return false;
+        }
 
-    if (/^:/.test(declaration)) {
-        displayAlert(caller, "missing spelling section", declaration);
-        return false;
-    }
+        if (/:$/.test(declaration)) {
+            displayAlert(caller, "missing attribute section", declaration);
+            return false;
+        }
 
-    if (/:$/.test(declaration)) {
-        displayAlert(caller, "missing attribute section", declaration);
-        return false;
-    }
+        let referenceSection = declaration.split(':')[1];
 
-    if (usedSpellings.includes(declaration.split(':')[0])) {
-        displayAlert(caller, "spelling collision", declaration);
-        return false;
+        if (/^,/.test(referenceSection) || /,,/.test(referenceSection)) {
+            displayAlert(caller, "empty reference", declaration);
+            return false;
+        }
+
+        if (/,$/.test(referenceSection)) {
+            displayAlert(caller, "trailing comma", declaration);
+            return false;
+        }
     }
 
     return true;
 }
 
-function validateSoundClassDeclaration(declaration, soundDeclarationText, usedNames) {
+function validateSoundClassDeclarations(declarations) {
     let caller = "Sound Class Declaration";
-
-    if (/^\s*$/.test(declaration)) {
-        displayAlert(caller, "empty declaration", declaration);
-        return false;
-    }
-
-    if (!declaration.includes(":")) {
-        displayAlert(caller, "missing colon delimeter", declaration);
-        return false;
-    }
-
-    if (/^:/.test(declaration)) {
-        displayAlert(caller, "missing name section", declaration);
-        return false;
-    }
-
-    if (!/^\w{1}:/.test(declaration)) {
-        displayAlert(caller, "name is longer than one character", declaration);
-        return false;
-    }
-
-    if (/:$/.test(declaration)) {
-        displayAlert(caller, "missing reference section", declaration);
-        return false;
-    }
-
-    let referenceSection = declaration.split(':')[1];
-
-    if (/^,/.test(referenceSection) || /,,/.test(referenceSection)) {
-        displayAlert(caller, "empty reference", declaration);
-        return false;
-    }
-
-    if (/,$/.test(referenceSection)) {
-        displayAlert(caller, "trailing comma", declaration);
-        return false;
-    }
-
-    let definedSoundReferences = soundDeclarationText
-        .split('\n')
-        .map((soundDeclaration) => soundDeclaration.split(':')[0]);
-
-    for (const reference of referenceSection.split(',')) {
-        if (!definedSoundReferences.includes(reference)) {
-            displayAlert(caller, "undefined sound reference: " + reference, declaration);
+    for (const declaration of declarations) {
+        if (/^$/.test(declaration)) {
+            displayAlert(caller, "empty declaration", declaration);
             return false;
         }
-    }
 
-    if (usedNames.includes(declaration.split(':')[0])) {
-        displayAlert(caller, "name collision", declaration);
-        return false;
+        if (!declaration.includes(":")) {
+            displayAlert(caller, "missing colon delimeter", declaration);
+            return false;
+        }
+
+        if (/^:/.test(declaration)) {
+            displayAlert(caller, "missing name section", declaration);
+            return false;
+        }
+
+        if (!/^\w{1}:/.test(declaration)) {
+            displayAlert(caller, "name is longer than one character", declaration);
+            return false;
+        }
+
+        if (/:$/.test(declaration)) {
+            displayAlert(caller, "missing reference section", declaration);
+            return false;
+        }
+
+        let referenceSection = declaration.split(':')[1];
+
+        if (/^,/.test(referenceSection) || /,,/.test(referenceSection)) {
+            displayAlert(caller, "empty reference", declaration);
+            return false;
+        }
+
+        if (/,$/.test(referenceSection)) {
+            displayAlert(caller, "trailing comma", declaration);
+            return false;
+        }
     }
 
     return true;
 }
 
-function validateWordStructureDeclaration(declaration, soundClassDeclarationText, usedWordStructureDeclarations) {
+function validateWordStructureDeclarations(declarations) {
     let caller = "Word Structure Declaration";
-
-    if (/^$/.test(declaration)) {
-        displayAlert(caller, "empty declaration", declaration);
-        return false;
-    }
-
-    let definedSoundClassReferences = soundClassDeclarationText
-        .split('\n')
-        .map((soundDeclaration) => soundDeclaration.split(':')[0]);
-
-    for (const reference of declaration.split('')) {
-        if (!definedSoundClassReferences.includes(reference)) {
-            displayAlert(caller, "undefined class reference: " + reference, declaration);
+    for (const declaration of declarations) {
+        if (/^$/.test(declaration)) {
+            displayAlert(caller, "empty declaration", declaration);
             return false;
         }
-    }
-
-    if (usedWordStructureDeclarations.includes(declaration)) {
-        displayAlert(caller, "declaration collision", declaration);
-        return false;
     }
 
     return true;
 }
 
+// Reference Validation Logic
+function validateSoundReferences(soundClassDeclarations, soundDeclarations) {
+    let spellings = soundDeclarations.map(declaration => declaration.split(':')[0]);
+    for (const declaration of soundClassDeclarations) {
+        let references = declaration.split(':')[1].split(',');
+        let validatedReferences = references.every(reference => spellings.includes(reference));
+        if (!validatedReferences) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function validateSoundClassReferences(wordStructureDeclarations, soundClassDeclarations) {
+    let classNames = soundClassDeclarations.map(declaration => declaration.split(':')[0]);
+    for (const declaration of wordStructureDeclarations) {
+        let references = declaration.split('');
+        let validatedReferences = references.every(reference => classNames.includes(reference));
+        if (!validatedReferences) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+// Validation Utility Function
 function displayAlert(caller, error, line) {
     alert(caller + "\n- error: " + error + "\n- declaration: " + formatToDisplay(line));
+}
+
+// Initialization Logic
+function initializeSounds(declarations) {
+    return declarations.map(declaration => {
+        let components = declaration.split(':');
+        return { spelling: components[0], attributes: components[1].split(',') };
+    });
+}
+
+function initializeSoundClasses(declarations, sounds) {
+    return declarations.map(declaration => {
+        let components = declaration.split(':');
+        let references = components[1].split(',');
+        let referencedSounds = sounds.filter(sound => references.includes(sound.spelling));
+        return { className: components[0], sounds: referencedSounds };
+    });
+}
+
+function initializeWordStructures(declarations, soundClasses) {
+    return declarations.map(declaration => {
+        let references = declaration.split('');
+        let referencedSoundClasses = references.map(reference => {
+            return soundClasses.filter(soundClass => soundClass.className == reference)[0]
+        });
+        return { soundClasses: referencedSoundClasses };
+    });
 }
