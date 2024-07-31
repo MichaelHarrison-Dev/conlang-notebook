@@ -32,28 +32,30 @@ function savePhonology() {
 function loadPhonology() {
     let phonology = JSON.parse(localStorage.getItem("phonology"));
 
-    phonology.sounds.forEach(sound => {
-        soundDeclarationTextArea.value += sound.spelling;
-        soundDeclarationTextArea.value += " : ";
-        sound.attributes.forEach((attribute, index) => soundDeclarationTextArea.value += (index == sound.attributes.length - 1) ? attribute + "\n" : attribute + ", ");
-    });
+    if (phonology != null) {
+        phonology.sounds.forEach(sound => {
+            soundDeclarationTextArea.value += sound.spelling;
+            soundDeclarationTextArea.value += " : ";
+            sound.attributes.forEach((attribute, index) => soundDeclarationTextArea.value += (index == sound.attributes.length - 1) ? attribute + "\n" : attribute + ", ");
+        });
 
-    phonology.soundClasses.forEach(soundClass => {
-        soundClassDeclarationTextArea.value += soundClass.className;
-        soundClassDeclarationTextArea.value += " : ";
-        soundClass.sounds.forEach((sound, index) => soundClassDeclarationTextArea.value += (index == soundClass.sounds.length - 1) ? sound.spelling + "\n" : sound.spelling + ", ");
-    });
+        phonology.soundClasses.forEach(soundClass => {
+            soundClassDeclarationTextArea.value += soundClass.className;
+            soundClassDeclarationTextArea.value += " : ";
+            soundClass.sounds.forEach((sound, index) => soundClassDeclarationTextArea.value += (index == soundClass.sounds.length - 1) ? sound.spelling + "\n" : sound.spelling + ", ");
+        });
 
-    phonology.wordStructures.forEach(wordStructure => {
-        wordStructure.soundClasses.forEach((soundClass, index) => wordStructureDeclarationTextArea.value += (index == wordStructure.soundClasses.length - 1) ? soundClass.className + "\n" : soundClass.className);
-    });
+        phonology.wordStructures.forEach(wordStructure => {
+            wordStructure.soundClasses.forEach((soundClass, index) => wordStructureDeclarationTextArea.value += (index == wordStructure.soundClasses.length - 1) ? soundClass.className + "\n" : soundClass.className);
+        });
+    }
 }
 
 // Formatting Logic
 function formatToStore(text) {
     return text
-        .replace(/\s+(?=(\n|$))/, "") 
-        .replace(/[ ]+/g, "") 
+        .replace(/\s+(?=(\n|$))/, "")
+        .replace(/[ ]+/g, "")
 }
 
 function formatToDisplay(text) {
@@ -62,8 +64,8 @@ function formatToDisplay(text) {
     }
 
     return text
-        .replace(/:/g, " : ") 
-        .replace(/,/g, ", "); 
+        .replace(/:/g, " : ")
+        .replace(/,/g, ", ");
 }
 
 // Syntax Validation Logic
