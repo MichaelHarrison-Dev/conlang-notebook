@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src="../word-generation/random-word-generator.js"></script>
+    <script src="../decision-tree/decision-tree.js"></script>
+    <script src="script.js" defer></script>
+    <title>Word Generator</title>
+</head>
+
+<body onload="setup()">
+    <div id="container">
+        <div id="sidebar">
+            <h1>Settings</h1>
+            <div class="setting-container">
+                <label for="word-count-input">Word Count</label>
+                <input id="word-count-input" type="text">
+            </div>
+            <div class="setting-container">
+                <h2>Word Structures</h2>
+                <ul id="word-structure-declaration-list">
+                </ul>
+            </div>
+        </div>
+        <div id="content">
+            <p id="output-paragraph"></p>
+        </div>
+    </div>
+    <div id="button-container">
+        <button onclick="generateWords()">Run</button>
+    </div>
+</body>
+
+</html>
