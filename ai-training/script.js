@@ -47,6 +47,7 @@ function initialize() {
 
         let checkbox = document.createElement("input");
         checkbox.setAttribute("type", "checkbox");
+        checkbox.setAttribute("id", declaration);
         checkbox.setAttribute("name", "word-structure-declaration");
         checkbox.setAttribute("value", JSON.stringify(wordStructure));
         checkbox.addEventListener("change", () => {
