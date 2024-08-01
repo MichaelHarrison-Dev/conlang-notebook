@@ -55,7 +55,6 @@ function generateWords() {
     for (let i = 0; i < wordCount; i++) {
         let word = randomWordGenerator.createWord();
         while (decisionTree.label(word) == "invalid-word") {
-            console.log(word.getSpelling());
             word = randomWordGenerator.createWord();
         }
         outputParagraph.innerText += word.getSpelling() + "\n";
